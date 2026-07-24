@@ -365,12 +365,15 @@ the error:
     "kiro": {
       "models": {
         "gpt-5.6-sol": {
+          "name": "GPT-5.6 Sol (2.4x)",
           "limit": { "context": 200000, "output": 64000 }
         },
         "gpt-5.6-terra": {
+          "name": "GPT-5.6 Terra (1.2x)",
           "limit": { "context": 200000, "output": 64000 }
         },
         "gpt-5.6-luna": {
+          "name": "GPT-5.6 Luna (0.6x)",
           "limit": { "context": 200000, "output": 64000 }
         }
       }
