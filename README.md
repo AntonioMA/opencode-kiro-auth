@@ -209,15 +209,15 @@ Full example with model definitions:
         },
         "gpt-5.6-sol": {
           "name": "GPT-5.6 Sol (2.4x)",
-          "limit": { "context": 272000, "output": 64000 }
+          "limit": { "context": 200000, "output": 64000 }
         },
         "gpt-5.6-terra": {
           "name": "GPT-5.6 Terra (1.2x)",
-          "limit": { "context": 272000, "output": 64000 }
+          "limit": { "context": 200000, "output": 64000 }
         },
         "gpt-5.6-luna": {
           "name": "GPT-5.6 Luna (0.6x)",
-          "limit": { "context": 272000, "output": 64000 }
+          "limit": { "context": 200000, "output": 64000 }
         },
         "deepseek-3.2": {
           "name": "DeepSeek 3.2 (0.25x)",
@@ -241,6 +241,15 @@ Full example with model definitions:
   }
 }
 ```
+
+> **Note on GPT-5.6 context limits**: `kiro-cli chat --list-models --format
+> json-pretty` advertises a 272k token context window for `gpt-5.6-sol`,
+> `gpt-5.6-terra`, and `gpt-5.6-luna`, but Kiro's backend currently returns
+> HTTP 400 once actual usage nears ~200k tokens. The example above caps their
+> `limit.context` at 200000 as a workaround; switching to a model with a
+> larger working context window and compacting the conversation resolves the
+> error. Adjust the value yourself if Kiro's backend starts honoring the
+> advertised window.
 
 ### Thinking Effort Configuration
 
