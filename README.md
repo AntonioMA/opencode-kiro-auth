@@ -7,6 +7,25 @@
 OpenCode plugin for AWS Kiro (CodeWhisperer) providing access to Claude Sonnet and Haiku
 models with substantial trial quotas.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+  - [Thinking Effort Configuration](#thinking-effort-configuration)
+- [Setup](#setup)
+- [Known Issues](#known-issues)
+  - [GPT-5.6 (Sol / Terra / Luna) fails with HTTP 400 near 200k tokens](#gpt-56-sol--terra--luna-fails-with-http-400-near-200k-tokens)
+- [Local plugin development](#local-plugin-development)
+- [Troubleshooting](#troubleshooting)
+  - [Error: Status: 403 (AccessDeniedException / User is not authorized)](#error-status-403-accessdeniedexception--user-is-not-authorized)
+  - [Error: No accounts](#error-no-accounts)
+  - [Note: `/connect` vs `opencode auth login`](#note-connect-vs-opencode-auth-login)
+  - [Kiro CLI (Google/GitHub OAuth) users: plugin sync does not start](#kiro-cli-googlegithub-oauth-users-plugin-sync-does-not-start)
+- [Configuration Options](#configuration-options)
+- [Storage](#storage)
+- [Acknowledgements](#acknowledgements)
+- [Disclaimer](#disclaimer)
+
 ## Features
 
 - **Multiple Auth Methods**: Supports AWS Builder ID (IDC), IAM Identity Center (custom
@@ -324,23 +343,6 @@ setting is a global override for all supported models, not a per-model setting.
      `idc_start_url` and `idc_region`.
 3. Configuration will be automatically managed at `~/.config/opencode/kiro.db`.
 
-## Local plugin development
-
-The simplest way to test local changes is to point OpenCode directly at your local repo
-path in `opencode.json` or `opencode.jsonc`:
-
-```json
-{
-  "plugin": ["/path/to/opencode-kiro-auth"]
-}
-```
-
-Then build and restart OpenCode to pick up changes:
-
-```bash
-npm run build
-```
-
 ## Known Issues
 
 ### GPT-5.6 (Sol / Terra / Luna) fails with HTTP 400 near 200k tokens
@@ -379,6 +381,23 @@ the error:
 
 Adjust or remove this override if Kiro's backend starts honoring the advertised
 272k window.
+
+## Local plugin development
+
+The simplest way to test local changes is to point OpenCode directly at your local repo
+path in `opencode.json` or `opencode.jsonc`:
+
+```json
+{
+  "plugin": ["/path/to/opencode-kiro-auth"]
+}
+```
+
+Then build and restart OpenCode to pick up changes:
+
+```bash
+npm run build
+```
 
 ## Troubleshooting
 
