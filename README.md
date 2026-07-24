@@ -341,6 +341,45 @@ Then build and restart OpenCode to pick up changes:
 npm run build
 ```
 
+## Known Issues
+
+### GPT-5.6 (Sol / Terra / Luna) fails with HTTP 400 near 200k tokens
+
+`kiro-cli chat --list-models --format json-pretty` advertises a 272k token context
+window for `gpt-5.6-sol`, `gpt-5.6-terra`, and `gpt-5.6-luna`, but Kiro's backend
+currently returns HTTP 400 once actual usage nears ~200k tokens. Switching to a
+model with a larger working context window and compacting the conversation makes
+the error go away, which points at a context-window mismatch between what Kiro
+advertises and what it actually supports for these models.
+
+If you land here after hitting error 400 on one of these models without having set
+the capped `limit.context` from the full config example above, add this minimal
+override to your `opencode.json`/`opencode.jsonc` to cap them at 200000 and avoid
+the error:
+
+```json
+{
+  "provider": {
+    "kiro": {
+      "models": {
+        "gpt-5.6-sol": {
+          "limit": { "context": 200000, "output": 64000 }
+        },
+        "gpt-5.6-terra": {
+          "limit": { "context": 200000, "output": 64000 }
+        },
+        "gpt-5.6-luna": {
+          "limit": { "context": 200000, "output": 64000 }
+        }
+      }
+    }
+  }
+}
+```
+
+Adjust or remove this override if Kiro's backend starts honoring the advertised
+272k window.
+
 ## Troubleshooting
 
 ### Error: Status: 403 (AccessDeniedException / User is not authorized)
