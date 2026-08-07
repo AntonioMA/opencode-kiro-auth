@@ -8,8 +8,8 @@ export type AccountSelectionStrategy = z.infer<typeof AccountSelectionStrategySc
  * - low: minimal reasoning
  * - medium: balanced (default when thinking enabled)
  * - high: deeper reasoning
- * - xhigh: extended reasoning (opus-4.7, opus-4.8 only)
- * - max: maximum reasoning depth (128k thinking tokens on opus-4.7/4.8)
+ * - xhigh: extended reasoning (xhigh-capable models only, see effort.ts)
+ * - max: maximum reasoning depth (up to 128k thinking tokens on opus-4.8/opus-5)
  */
 export const EffortSchema = z.enum(['low', 'medium', 'high', 'xhigh', 'max'])
 export type Effort = z.infer<typeof EffortSchema>
@@ -86,7 +86,7 @@ export const KiroConfigSchema = z.object({
   /**
    * Default effort level for thinking models. Controls reasoning depth.
    * When set, this overrides the automatic budget-based mapping.
-   * Values: 'low', 'medium', 'high', 'xhigh' (opus-4.7/4.8 only), 'max'
+   * Values: 'low', 'medium', 'high', 'xhigh' (see XHIGH_CAPABLE_MODELS), 'max'
    */
   effort: EffortSchema.optional(),
 
@@ -95,7 +95,14 @@ export const KiroConfigSchema = z.object({
    * When true (default), maps budget ranges to effort levels.
    * When false, only uses explicit effort config or falls back to 'medium'.
    */
-  auto_effort_mapping: z.boolean().default(true)
+  auto_effort_mapping: z.boolean().default(true),
+
+  // Expose Kiro's server-side web search as a `kiro_web_search` tool. Kiro runs
+  // the search on its own infrastructure (billed as Kiro credits) and returns
+  // structured results. Requires a Pro account (profileArn); on free Builder ID
+  // accounts the tool is not registered. Disable to avoid overlap with other
+  // search tools/MCP servers.
+  web_search_enabled: z.boolean().default(true)
 })
 
 export type KiroConfig = z.infer<typeof KiroConfigSchema>
@@ -114,5 +121,6 @@ export const DEFAULT_CONFIG: KiroConfig = {
   usage_tracking_enabled: true,
   auto_sync_kiro_cli: true,
   enable_log_api_request: false,
-  auto_effort_mapping: true
+  auto_effort_mapping: true,
+  web_search_enabled: true
 }

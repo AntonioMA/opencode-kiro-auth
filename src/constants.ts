@@ -65,6 +65,8 @@ export const MODEL_MAPPING: Record<string, string> = {
   'claude-sonnet-4-6-1m-thinking': 'claude-sonnet-4.6-1m',
   'claude-sonnet-5': 'claude-sonnet-5',
   'claude-sonnet-5-thinking': 'claude-sonnet-5',
+  'claude-sonnet-5-1m': 'claude-sonnet-5-1m',
+  'claude-sonnet-5-1m-thinking': 'claude-sonnet-5-1m',
   // Claude Opus
   'claude-opus-4-5': 'claude-opus-4.5',
   'claude-opus-4-5-thinking': 'claude-opus-4.5',
@@ -76,6 +78,8 @@ export const MODEL_MAPPING: Record<string, string> = {
   'claude-opus-4-7-thinking': 'claude-opus-4.7',
   'claude-opus-4-8': 'claude-opus-4.8',
   'claude-opus-4-8-thinking': 'claude-opus-4.8',
+  'claude-opus-5': 'claude-opus-5',
+  'claude-opus-5-thinking': 'claude-opus-5',
   // Auto
   auto: 'auto',
   // Open weight models
@@ -84,10 +88,6 @@ export const MODEL_MAPPING: Record<string, string> = {
   'minimax-m2.5': 'minimax-m2.5',
   'minimax-m2.1': 'minimax-m2.1',
   'qwen3-coder-next': 'qwen3-coder-next',
-  // OpenAI GPT-5.6
-  'gpt-5.6-sol': 'gpt-5.6-sol',
-  'gpt-5.6-terra': 'gpt-5.6-terra',
-  'gpt-5.6-luna': 'gpt-5.6-luna',
   // Legacy / internal mappings kept for backwards compatibility
   'claude-3-7-sonnet': 'CLAUDE_3_7_SONNET_20250219_V1_0',
   'nova-swe': 'AGI_NOVA_SWE_V1_5',
