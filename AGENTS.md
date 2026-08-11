@@ -29,20 +29,26 @@ so changes are invisible until rebuilt.
 
 ## Versioning & releases
 
-Every push to `master` is evaluated for a new release by CI. Write **conventional commit**
-messages so the auto-semver tagger bumps correctly:
+Releases are manual — there is no CI-driven auto-versioning or tagging. To cut a
+release:
 
-| Prefix | Bump | Example |
-|--------|------|---------|
-| `feat:` | minor | `feat: add sonnet 5 support` |
-| `fix:`, `perf:`, `refactor:`, `test:`, `chore:`, `docs:`, `style:`, `ci:`, `build:`, `revert:` | patch | `fix: handle null profileArn` |
-| `BREAKING CHANGE:` in body | major | `feat: rewrite auth\n\nBREAKING CHANGE: ...` |
+1. Bump `version` in `package.json` (semver, by hand).
+2. `npm run typecheck && npm test && npm run build`.
+3. `npm publish` (publishes `dist/`, `package.json`, `README.md`, `CHANGELOG.md`
+   per the `files` field; requires npm auth/2FA locally).
+4. Commit the version bump and push to `master`.
 
-Plain messages (no prefix) won't trigger a version bump. Any conventional commit
-prefix produces a bump. After merge, the pipeline
-builds `dist/`, commits it, pushes a semver tag (e.g. `v1.12.0`), moves the floating
-`v1` tag, and creates a GitHub Release with auto-generated changelog notes.
-Users should pin `v1` in `opencode.json`, not a specific patch version.
+`dist/` is never committed to `master` or any git tag — npm is the only distribution
+channel. Users install via `@gchamon/opencode-kiro-auth` in their `opencode.json`
+`plugin` array (optionally pinned to an exact version); there is no floating `v1`
+git tag or GitHub Release to point at instead.
+
+This repo previously used a CI pipeline (`.github/workflows/release.yml` +
+`master-tarball.yml`) that auto-bumped semver from conventional commits, committed
+`dist/` onto release tags, and published via npm Trusted Publishing. It was removed:
+too slow for the OpenCode dev loop, and npm publish alone covers distribution. Commit
+messages don't need conventional-commit prefixes anymore, though they're still good
+practice.
 
 ## Build/ESM gotcha
 
@@ -124,15 +130,10 @@ schema and README in sync when adding options.
 
 ## Release pipeline
 
-`.github/workflows/release.yml` runs on every push to master: typecheck + build, then
-computes the next semver from conventional-commit prefixes since the last tag
-(`feat:` → minor, `fix:`/`chore:`/etc. → patch, `BREAKING CHANGE` → major; other
-messages cut no release). It commits `dist/` on a **detached commit reachable only via
-the release tags** (`vX.Y.Z` plus the force-moved floating `v1`) and creates a GitHub
-Release, and publishes `@gchamon/opencode-kiro-auth` to npm via Trusted Publishing
-(OIDC; configured on npmjs.com, no token secret). `dist/` must never be committed to
-master — OpenCode installs plugins via npm Arborist with `ignoreScripts: true`, so
-whatever users install (the npm package, or the `#v1`/`vX.Y.Z` git tags) must contain
-prebuilt `dist/`; build-on-install is impossible. npm is the recommended install spec
-(OpenCode caches registry packages by name — fast startup); git specs re-resolve on
-every startup and are slow.
+There is no release CI. Publishing is a manual `npm publish` from a maintainer's
+machine after a local version bump (see Versioning & releases above). `dist/` is
+never committed to git — OpenCode installs plugins via npm Arborist with
+`ignoreScripts: true`, so the npm package (which ships prebuilt `dist/` per the
+`files` field) is the only supported install spec; build-on-install is impossible,
+and unpublished git specs would need their own prebuilt `dist/` commit, which this
+repo does not maintain.
