@@ -42,11 +42,15 @@ export class AccountSelector {
     if (!acc) {
       this.circuitBreakerTrips++
       const wait = this.accountManager.getMinWaitTime()
-      if (wait > 0 && wait < 30000) {
+      if (wait > 0) {
+        // Any positive rate-limit wait is a capacity issue, not an auth
+        // failure — never translate this into "reauth required", even if the
+        // wait is long. Cap the actual sleep so we still respond to
+        // cancellation/timeouts, but keep reporting the real wait to the user.
         if (this.accountManager.shouldShowToast()) {
           showToast(`All accounts rate-limited. Waiting ${Math.ceil(wait / 1000)}s...`, 'warning')
         }
-        await this.sleep(wait)
+        await this.sleep(Math.min(wait, 30000))
         return null
       }
       throw new Error('All accounts are unhealthy or rate-limited: reauth required')

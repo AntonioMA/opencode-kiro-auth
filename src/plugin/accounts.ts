@@ -196,6 +196,15 @@ export class AccountManager {
       })
     )
   }
+  /** Like addAccount(), but for reconciling a value already read from the
+   *  repository/DB into the in-memory pool without writing it back — avoids
+   *  redundant writes and the risk of a delayed write clobbering a newer
+   *  credential that lands between the read and the write. */
+  reconcileAccount(a: ManagedAccount): void {
+    const i = this.accounts.findIndex((x) => x.id === a.id)
+    if (i === -1) this.accounts.push(a)
+    else this.accounts[i] = a
+  }
   removeAccount(a: ManagedAccount): void {
     const removedIndex = this.accounts.findIndex((x) => x.id === a.id)
     if (removedIndex === -1) return

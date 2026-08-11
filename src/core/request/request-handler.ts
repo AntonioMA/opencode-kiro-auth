@@ -99,6 +99,9 @@ export class RequestHandler {
       }
 
       if (this.allAccountsPermanentlyUnhealthy()) {
+        if (await this.attemptNonInteractiveRecovery()) {
+          continue
+        }
         const reauthed = await this.triggerReauth(showToast)
         if (!reauthed) {
           throw new Error('All accounts are permanently unhealthy. Please re-authenticate.')
@@ -108,6 +111,9 @@ export class RequestHandler {
 
       let acc = await this.accountSelector.selectHealthyAccount(showToast).catch(async (e) => {
         if (e instanceof Error && e.message.includes('reauth required')) {
+          if (await this.attemptNonInteractiveRecovery()) {
+            return null
+          }
           const reauthed = await this.triggerReauth(showToast)
           if (!reauthed)
             throw new Error('All accounts are unhealthy or rate-limited. Please re-authenticate.')
@@ -123,14 +129,23 @@ export class RequestHandler {
       }
 
       consecutiveNullAccounts = 0
-      const auth = this.accountManager.toAuthDetails(acc)
 
-      const tokenResult = await this.tokenRefresher.refreshIfNeeded(acc, auth, showToast)
+      const tokenResult = await this.tokenRefresher.refreshIfNeeded(
+        acc,
+        this.accountManager.toAuthDetails(acc),
+        showToast
+      )
       if (tokenResult.shouldContinue) {
         acc = tokenResult.account
         await this.sleep(500)
         continue
       }
+
+      // Rebuild auth from the (possibly refreshed) account rather than reusing
+      // a pre-refresh snapshot, so the SDK client always sends the token that
+      // was just persisted, never a stale one from before refreshIfNeeded().
+      acc = tokenResult.account
+      const auth = this.accountManager.toAuthDetails(acc)
 
       const sdkPrep = this.prepareSdkRequest(init?.body, model, auth, think, budget, showToast)
 
@@ -407,6 +422,80 @@ export class RequestHandler {
       logger.error('Re-auth failed', e instanceof Error ? e : new Error(String(e)))
       return false
     }
+  }
+
+  /**
+   * Non-interactive recovery attempted before ever opening a browser for
+   * device-code auth. A refresh may have already succeeded and persisted
+   * fresh credentials (e.g. from a concurrent startup usage refresh, or from
+   * Kiro CLI) that the in-memory AccountManager hasn't picked up yet. This
+   * reloads the repository, re-syncs Kiro CLI if enabled, reconciles any
+   * recovered accounts into memory (without writing them back), and tries a
+   * refresh for any account that still looks unhealthy. Returns true if at
+   * least one account became usable, so the caller can retry the request
+   * loop instead of falling through to interactive OAuth.
+   */
+  private async attemptNonInteractiveRecovery(): Promise<boolean> {
+    if (this.config.auto_sync_kiro_cli) {
+      try {
+        await syncFromKiroCli()
+      } catch (e) {
+        logger.warn('Non-interactive recovery: Kiro CLI sync failed', {
+          message: e instanceof Error ? e.message : String(e)
+        })
+      }
+    }
+
+    this.repository.invalidateCache()
+    let persisted: ManagedAccount[]
+    try {
+      persisted = await this.repository.findAll()
+    } catch (e) {
+      logger.warn('Non-interactive recovery: repository reload failed', {
+        message: e instanceof Error ? e.message : String(e)
+      })
+      return false
+    }
+
+    for (const acc of persisted) {
+      this.accountManager.reconcileAccount(acc)
+    }
+
+    let recovered = false
+    const now = Date.now()
+    for (const acc of this.accountManager.getAccounts()) {
+      const isUsable =
+        acc.isHealthy && acc.expiresAt > now && !isPermanentError(acc.unhealthyReason)
+      if (isUsable) {
+        recovered = true
+        continue
+      }
+      if (isPermanentError(acc.unhealthyReason)) {
+        // Give a permanently-unhealthy account one more chance: it may have
+        // been marked so by a losing refresh in a rotating-token race while a
+        // sibling call already rotated it successfully (handled above via
+        // reconcileAccount), or a fresh refresh token may already be sitting
+        // in the DB/Kiro CLI. forceRefresh() checks both before attempting a
+        // network refresh, and TokenRefresher's per-account lock keeps this
+        // from racing a concurrent refresh for the same account.
+        try {
+          const result = await this.tokenRefresher.forceRefresh(
+            acc,
+            this.accountManager.toAuthDetails(acc)
+          )
+          if (result.success) {
+            recovered = true
+          }
+        } catch (e) {
+          logger.warn('Non-interactive recovery: force refresh failed', {
+            email: acc.email,
+            message: e instanceof Error ? e.message : String(e)
+          })
+        }
+      }
+    }
+
+    return recovered
   }
 
   private hasUsableAccount(accounts: ManagedAccount[]): boolean {

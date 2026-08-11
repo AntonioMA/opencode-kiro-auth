@@ -50,10 +50,14 @@ export class ErrorHandler {
 
     if (response.status === 401 && context.retry < this.config.rate_limit_max_retries) {
       const reason = await readBody()
-      showToast(`401: ${reason || 'Unauthorized'}. Retrying...`, 'warning')
+      showToast(`401: ${reason || 'Unauthorized'}. Refreshing and retrying...`, 'warning')
+      // A 401 means the current access token was rejected outright — retrying
+      // with the same token (as before) just repeats the failure. Force a
+      // refresh first so the retry has a chance of succeeding.
       return {
         shouldRetry: true,
-        newContext: { ...context, retry: context.retry + 1 }
+        newContext: { ...context, retry: context.retry + 1 },
+        forceRefresh: true
       }
     }
 
