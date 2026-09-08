@@ -4,8 +4,8 @@
 [![npm downloads](https://img.shields.io/npm/dm/@gchamon/opencode-kiro-auth)](https://www.npmjs.com/package/@gchamon/opencode-kiro-auth)
 [![license](https://img.shields.io/npm/l/@gchamon/opencode-kiro-auth)](https://www.npmjs.com/package/@gchamon/opencode-kiro-auth)
 
-OpenCode plugin for AWS Kiro (CodeWhisperer) providing access to Claude Sonnet and Haiku
-models with substantial trial quotas.
+OpenCode plugin for AWS Kiro (CodeWhisperer) providing access to Claude, GPT-5.6, and open
+weight models with substantial trial quotas.
 
 ## Features
 
@@ -37,9 +37,13 @@ Add the plugin to your `opencode.json` or `opencode.jsonc`:
 }
 ```
 
-That is the whole configuration. The plugin registers the `kiro` provider and
-advertises every model Kiro exposes, including a `-thinking` companion for each
+That is the whole configuration. The plugin registers the `kiro` provider and advertises the
+models exposed by the installed Kiro account, including a `-thinking` companion for each Claude
 model that supports reasoning effort. Run `/models` to pick one.
+
+The current Kiro model set includes `auto`, Claude Haiku, Sonnet, and Opus, GPT-5.6 Sol/Terra/Luna,
+DeepSeek 3.2, GLM-5, MiniMax M2.1/M2.5, and Qwen3 Coder Next. Model availability and quotas are
+controlled by Kiro and may vary by account.
 
 Defining `provider.kiro.models` yourself replaces the plugin's registry entirely.
 Only do that to rename or restrict models, and see the reasoning flags below if
@@ -92,9 +96,9 @@ reachable from a budget alone:
 get a five-variant ladder; the rest get four, and a budget in the `xhigh` band is
 clamped to `max`.
 
-Kiro's GPT-5.6 tiers are not advertised. They configure reasoning through
-`reasoning.effort` / `reasoning.mode` instead of `output_config.effort`, so they
-need a separate request path.
+GPT-5.6 tiers are advertised as regular models. They use Kiro's separate `reasoning.effort`
+request contract rather than Claude's `output_config.effort`, so the plugin does not currently
+advertise `-thinking` variants for them.
 
 Use `~/.config/opencode/kiro.json` for plugin-wide behavior such as auth sync,
 account selection, retry limits, and `auto_effort_mapping`. A top-level `effort`

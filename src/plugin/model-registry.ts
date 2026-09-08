@@ -31,12 +31,12 @@ interface ModelSpec {
 /**
  * Models Kiro exposes, keyed by the OpenCode-facing model ID.
  *
- * Anthropic and open-weight models only. Kiro's GPT-5.6 tiers are deliberately
- * absent: they configure reasoning through `reasoning.effort` / `reasoning.mode`
- * rather than `output_config.effort`, so they need their own request path.
+ * Claude, GPT-5.6, and open-weight models. GPT-5.6 tiers are advertised without
+ * thinking companions because they configure reasoning through `reasoning.effort`
+ * rather than Claude's `output_config.effort` contract.
  */
 const MODEL_SPECS: Record<string, ModelSpec> = {
-  auto: { name: 'Auto', rate: '1.0x', limit: CONTEXT_200K, modalities: MULTIMODAL },
+  auto: { name: 'Auto', rate: '1.0x', limit: CONTEXT_1M, modalities: MULTIMODAL },
 
   // Claude Sonnet
   'claude-sonnet-4': {
@@ -112,11 +112,31 @@ const MODEL_SPECS: Record<string, ModelSpec> = {
     thinking: true
   },
 
+  // OpenAI GPT-5.6
+  'gpt-5.6-sol': {
+    name: 'GPT-5.6 Sol',
+    rate: '2.4x',
+    limit: { context: 272000, output: 64000 },
+    modalities: TEXT_ONLY
+  },
+  'gpt-5.6-terra': {
+    name: 'GPT-5.6 Terra',
+    rate: '1.0x',
+    limit: { context: 272000, output: 64000 },
+    modalities: TEXT_ONLY
+  },
+  'gpt-5.6-luna': {
+    name: 'GPT-5.6 Luna',
+    rate: '0.1x',
+    limit: { context: 272000, output: 64000 },
+    modalities: TEXT_ONLY
+  },
+
   // Open weight models
   'deepseek-3.2': {
     name: 'DeepSeek 3.2',
     rate: '0.25x',
-    limit: { context: 128000, output: 64000 },
+    limit: { context: 164000, output: 64000 },
     modalities: TEXT_ONLY
   },
   'glm-5': { name: 'GLM-5', rate: '0.5x', limit: CONTEXT_200K, modalities: TEXT_ONLY },

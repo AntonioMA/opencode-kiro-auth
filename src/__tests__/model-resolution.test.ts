@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { SUPPORTED_MODELS } from '../constants.js'
-import { resolveKiroModel } from '../plugin/models.js'
+import { MODEL_CONTEXT_WINDOWS, SUPPORTED_MODELS } from '../constants.js'
+import { getContextWindowSize, resolveKiroModel } from '../plugin/models.js'
 
 describe('resolveKiroModel', () => {
   test('resolves newly advertised model slugs', () => {
@@ -9,6 +9,9 @@ describe('resolveKiroModel', () => {
     expect(resolveKiroModel('minimax-m2.5')).toBe('minimax-m2.5')
     expect(resolveKiroModel('minimax-m2.1')).toBe('minimax-m2.1')
     expect(resolveKiroModel('qwen3-coder-next')).toBe('qwen3-coder-next')
+    expect(resolveKiroModel('gpt-5.6-sol')).toBe('gpt-5.6-sol')
+    expect(resolveKiroModel('gpt-5.6-terra')).toBe('gpt-5.6-terra')
+    expect(resolveKiroModel('gpt-5.6-luna')).toBe('gpt-5.6-luna')
   })
 
   test('keeps existing supported Claude slugs intact', () => {
@@ -33,6 +36,15 @@ describe('resolveKiroModel', () => {
 
   test('supported model list excludes removed qwen3-coder-480b slug', () => {
     expect(SUPPORTED_MODELS).not.toContain('qwen3-coder-480b')
+  })
+
+  test('uses Kiro context windows for native model IDs', () => {
+    expect(getContextWindowSize('auto')).toBe(1000000)
+    expect(getContextWindowSize('claude-opus-4.6')).toBe(1000000)
+    expect(getContextWindowSize('gpt-5.6-sol')).toBe(272000)
+    expect(getContextWindowSize('deepseek-3.2')).toBe(164000)
+    expect(getContextWindowSize('qwen3-coder-next')).toBe(256000)
+    expect(MODEL_CONTEXT_WINDOWS['minimax-m2.5']).toBe(196000)
   })
 
   test('rejects unknown slugs', () => {

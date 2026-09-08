@@ -102,10 +102,48 @@ export const MODEL_MAPPING: Record<string, string> = {
 
 export const SUPPORTED_MODELS = Object.keys(MODEL_MAPPING)
 
-const LONG_CONTEXT_MODELS = new Set(Object.keys(MODEL_MAPPING).filter((k) => k.includes('-1m')))
+/**
+ * Context windows reported by Kiro's ListAvailableModels API.
+ *
+ * Models not listed here use Kiro's standard 200k context window. OpenCode
+ * aliases are included alongside native Kiro IDs because responses report the
+ * model selected by the caller rather than the resolved API model.
+ */
+export const MODEL_CONTEXT_WINDOWS: Readonly<Record<string, number>> = {
+  auto: 1000000,
+  'claude-opus-4.6': 1000000,
+  'claude-opus-4-6': 1000000,
+  'claude-opus-4-6-thinking': 1000000,
+  'claude-opus-4-6-1m': 1000000,
+  'claude-opus-4-6-1m-thinking': 1000000,
+  'claude-opus-4.7': 1000000,
+  'claude-opus-4-7': 1000000,
+  'claude-opus-4-7-thinking': 1000000,
+  'claude-opus-4.8': 1000000,
+  'claude-opus-4-8': 1000000,
+  'claude-opus-4-8-thinking': 1000000,
+  'claude-opus-5': 1000000,
+  'claude-opus-5-thinking': 1000000,
+  'claude-sonnet-4.6': 1000000,
+  'claude-sonnet-4-6': 1000000,
+  'claude-sonnet-4-6-thinking': 1000000,
+  'claude-sonnet-4-6-1m': 1000000,
+  'claude-sonnet-4-6-1m-thinking': 1000000,
+  'claude-sonnet-5': 1000000,
+  'claude-sonnet-5-thinking': 1000000,
+  'claude-sonnet-5-1m': 1000000,
+  'claude-sonnet-5-1m-thinking': 1000000,
+  'gpt-5.6-sol': 272000,
+  'gpt-5.6-terra': 272000,
+  'gpt-5.6-luna': 272000,
+  'deepseek-3.2': 164000,
+  'qwen3-coder-next': 256000,
+  'minimax-m2.5': 196000,
+  'minimax-m2.1': 196000
+}
 
 export function isLongContextModel(model: string): boolean {
-  return LONG_CONTEXT_MODELS.has(model)
+  return (MODEL_CONTEXT_WINDOWS[model] ?? 200000) > 200000
 }
 
 export const KIRO_AUTH_SERVICE = {

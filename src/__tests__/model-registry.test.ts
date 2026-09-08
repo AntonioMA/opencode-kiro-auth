@@ -37,10 +37,46 @@ describe('model registry', () => {
     )
   })
 
-  test('does not advertise Kiro GPT tiers, which use a different reasoning contract', () => {
-    for (const id of Object.keys(registry)) {
-      expect(id.startsWith('gpt-')).toBe(false)
-    }
+  test('advertises every model returned by the installed Kiro CLI', () => {
+    const baseModels = Object.keys(registry).filter((id) => !id.endsWith('-thinking'))
+    expect(baseModels.sort()).toEqual(
+      [
+        'auto',
+        'claude-haiku-4-5',
+        'claude-opus-4-5',
+        'claude-opus-4-6',
+        'claude-opus-4-7',
+        'claude-opus-4-8',
+        'claude-opus-5',
+        'claude-sonnet-4',
+        'claude-sonnet-4-5',
+        'claude-sonnet-4-6',
+        'claude-sonnet-5',
+        'deepseek-3.2',
+        'glm-5',
+        'gpt-5.6-luna',
+        'gpt-5.6-sol',
+        'gpt-5.6-terra',
+        'minimax-m2.1',
+        'minimax-m2.5',
+        'qwen3-coder-next'
+      ].sort()
+    )
+  })
+
+  test('advertises GPT-5.6 metadata without Claude thinking variants', () => {
+    expect(registry['gpt-5.6-sol'].limit).toEqual({ context: 272000, output: 64000 })
+    expect(registry['gpt-5.6-sol'].name).toContain('2.4x')
+    expect(registry['gpt-5.6-terra'].name).toContain('1.0x')
+    expect(registry['gpt-5.6-luna'].name).toContain('0.1x')
+    expect(registry['gpt-5.6-sol-thinking']).toBeUndefined()
+  })
+
+  test('uses the context limits reported by Kiro CLI', () => {
+    expect(registry.auto.limit).toEqual({ context: 1000000, output: 64000 })
+    expect(registry['claude-opus-4-6'].limit).toEqual({ context: 1000000, output: 64000 })
+    expect(registry['deepseek-3.2'].limit).toEqual({ context: 164000, output: 64000 })
+    expect(registry['qwen3-coder-next'].limit).toEqual({ context: 256000, output: 64000 })
   })
 
   describe('reasoning capability flags', () => {
