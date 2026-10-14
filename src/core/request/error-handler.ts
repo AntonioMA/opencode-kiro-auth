@@ -1,6 +1,7 @@
 import type { AccountRepository } from '../../infrastructure/database/account-repository'
 import type { AccountManager } from '../../plugin/accounts'
 import type { ManagedAccount } from '../../plugin/types'
+import { error as logError } from '../../plugin/logger';
 
 type ToastFunction = (message: string, variant: 'info' | 'warning' | 'success' | 'error') => void
 
@@ -41,7 +42,24 @@ export class ErrorHandler {
         return ''
       }
     }
-
+    try {
+      const errorBodyText = await response.clone().text();
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      logError('HTTP error from Kiro API', {
+           url: response.url,
+           status: response.status,
+           statusText: response.statusText,
+           headers,
+           body: errorBodyText,
+           error: error?.message || String(error),
+           email: account?.email || 'unknown',
+           retry: context?.retry,
+       });
+    }
+    catch { }
     if (response.status === 400) {
       const reason = await readBody()
       showToast(`400: ${reason || 'unknown'}`, 'error')

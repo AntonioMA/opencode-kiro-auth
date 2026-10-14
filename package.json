@@ -10,6 +10,7 @@
     "format": "prettier --write 'src/**/*.ts'",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
+    "install:local": "bash scripts/install-local.sh",
     "prepare": "husky"
   },
   "keywords": [
