@@ -1,0 +1,33 @@
+package.json
+  s_f47227cbeb93e8::t_049bf36c602244 13
+scripts/install-local.sh
+  s_f47227cbeb93e8::t_9b011b29b32c95 1-54
+src/core/request/error-handler.ts
+  s_4311ba6315f9c2::t_09d525f69ba870 47-55
+  s_4311ba6315f9c2::t_dcc6915683a3e2 45-46
+  s_4311ba6315f9c2::t_b25f785414597c 56-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e3735560d787d972a2c06279990a5ebde3fbc3c5",
+  "prompts": {},
+  "sessions": {
+    "s_4311ba6315f9c2": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_edf9c4c68ffe21BHHSpY2UhRJw",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Antonio M. Amaya <antoniom.amayacalvo@vonage.com>"
+    },
+    "s_f47227cbeb93e8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_edf8ed0f5ffeHFjHWqh2x7CM1M",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Antonio M. Amaya <antoniom.amayacalvo@vonage.com>"
+    }
+  }
+}
